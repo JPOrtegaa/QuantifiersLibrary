@@ -1,8 +1,10 @@
-from interface_class.Quantifier import Quantifier
-import pandas as pd
+from QuantifiersLibrary.interface_class.Quantifier import Quantifier
+
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import train_test_split
 from sklearn import datasets
+
+import pandas as pd
 
 class ProbabilisticClassifyCount(Quantifier):
 
@@ -11,8 +13,8 @@ class ProbabilisticClassifyCount(Quantifier):
 
     @staticmethod
     def get_class_proportion(scores):
-        total_instances = scores.shape[0]
-        number_classes = scores.shape[1]
+        total_instances = len(scores)
+        number_classes = len(scores[0])
 
         result = [0] * number_classes
 
@@ -20,8 +22,7 @@ class ProbabilisticClassifyCount(Quantifier):
             for i in range(number_classes):
                 result[i] += score[i]
 
-        for i in range(number_classes):
-            result[i] = round(result[i] / total_instances, 2)
+        result = [round(res/total_instances, 2) for res in result]
 
         return result
 

@@ -1,5 +1,5 @@
-from interface_class.Quantifier import Quantifier
-from utils.Quantifier_Utils import TPRandFPR
+from QuantifiersLibrary.interface_class.Quantifier import Quantifier
+from QuantifiersLibrary.utils.Quantifier_Utils import TPRandFPR
 
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import train_test_split
@@ -15,8 +15,8 @@ class AdjustedClassifyCount(Quantifier):
         self.tprfpr = None
 
     def get_class_proportion(self, scores):
-        total_instances = scores.shape[0]
-        number_classes = scores.shape[1]
+        total_instances = len(scores)
+        number_classes = len(scores[0])
         result = [0] * number_classes
 
         # Counting positive and negative classes
@@ -34,10 +34,12 @@ class AdjustedClassifyCount(Quantifier):
         pos_classify_proportion = round(pos_classify_proportion, 2)
 
         # Counting result_table for positive class
-        pos_adjusted = (pos_classify_proportion - self.tprfpr['fpr']) / diff_tprfpr
-
-        # Transforming to float
-        pos_adjusted = float(pos_adjusted.iloc[0])
+        if diff_tprfpr.iloc[0] == 0:
+            pos_adjusted = pos_classify_proportion
+        else:
+            pos_adjusted = (pos_classify_proportion - self.tprfpr['fpr']) / diff_tprfpr
+            # Transforming to float
+            pos_adjusted = float(pos_adjusted.iloc[0])
 
         # Ensuring the result_table between 0 and 1
         if pos_adjusted <= 0:

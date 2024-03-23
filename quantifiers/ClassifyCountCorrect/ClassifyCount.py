@@ -1,7 +1,9 @@
-from interface_class.Quantifier import Quantifier
+from QuantifiersLibrary.interface_class.Quantifier import Quantifier
+
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import train_test_split
 from sklearn import datasets
+
 import pandas as pd
 import numpy as np
 
@@ -12,8 +14,8 @@ class ClassifyCount(Quantifier):
         self.threshold = threshold
 
     def get_class_proportion(self, scores):
-        total_instances = scores.shape[0]
-        number_classes = scores.shape[1]
+        total_instances = len(scores)
+        number_classes = len(scores[0])
         result = [0] * number_classes
 
         if number_classes > 2:
@@ -27,8 +29,7 @@ class ClassifyCount(Quantifier):
                 else:
                     result[1] += 1
 
-        for i in range(len(result)):
-            result[i] = round(result[i] / total_instances, 2)
+        result = [round(proportion/total_instances, 2) for proportion in result]
 
         return result
 

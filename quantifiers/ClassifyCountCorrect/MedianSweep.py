@@ -1,5 +1,7 @@
-from interface_class.Quantifier import Quantifier
-from utils.Quantifier_Utils import TPRandFPR
+import pdb
+
+from QuantifiersLibrary.interface_class.Quantifier import Quantifier
+from QuantifiersLibrary.utils.Quantifier_Utils import TPRandFPR
 
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import train_test_split
@@ -31,15 +33,21 @@ class MedianSweep(Quantifier):
 
             batch_size = len(scores)
 
-            pos_scores = scores[:,1]
+            pos_scores = [score[1] for score in scores]
 
             estimated_positive_ratio = len([pos_score for pos_score in pos_scores if pos_score >= threshold])
             estimated_positive_ratio /= batch_size
 
             diff_tpr_fpr = abs(tpr - fpr)
+            # Getting the float
+            diff_tpr_fpr = diff_tpr_fpr.iloc[0]
 
             # Calculating the positive class proportion
-            final_prevalence = round(abs(estimated_positive_ratio - fpr) / diff_tpr_fpr, 2)
+            if diff_tpr_fpr == 0:
+                final_prevalence = estimated_positive_ratio
+            else:
+                final_prevalence = round(abs(estimated_positive_ratio - fpr) / diff_tpr_fpr, 2)
+                final_prevalence = final_prevalence.iloc[0]
 
             # Appending to the array
             prevalances_array.append(final_prevalence)
@@ -70,7 +78,7 @@ class MedianSweep(Quantifier):
         # Validation result_table
         pos_val_scores = self.classifier.predict_proba(X_val_test)[:, 1]
 
-        # Generating the dataframe with the positive scores and it's own class
+        # Generating the dataframe with the positive scores and its own class
         pos_val_scores = pd.DataFrame(pos_val_scores, columns=['score'])
         pos_val_labels = pd.DataFrame(y_val_test, columns=['class'])
 

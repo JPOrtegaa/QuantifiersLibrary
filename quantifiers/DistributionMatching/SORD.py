@@ -1,4 +1,4 @@
-from interface_class.Quantifier import Quantifier
+from QuantifiersLibrary.interface_class.Quantifier import Quantifier
 
 import pandas as pd
 import numpy as np

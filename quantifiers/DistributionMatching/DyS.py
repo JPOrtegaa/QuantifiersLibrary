@@ -1,17 +1,14 @@
-from interface_class.Quantifier import Quantifier
-from utils import Quantifier_Utils as utils
-from quantifiers.ClassifyCountCorrect import ClassifyCount
+import pdb
 
-import pandas as pd
-import numpy as np
-
-from interface_class.Quantifier import Quantifier
+from QuantifiersLibrary.interface_class.Quantifier import Quantifier
+from QuantifiersLibrary.utils import Quantifier_Utils as utils
 
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import train_test_split
 from sklearn import datasets
 
-import pdb
+import pandas as pd
+import numpy as np
 
 class DyS(Quantifier):
 
@@ -62,7 +59,7 @@ class DyS(Quantifier):
 
     def predict(self, X_test):
         scores = self.classifier.predict_proba(X_test)
-        scores = scores[:,1]
+        scores = [score[1] for score in scores]
 
         self.test_scores = scores
 

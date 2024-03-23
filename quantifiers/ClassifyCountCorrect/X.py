@@ -1,5 +1,5 @@
-from interface_class.Quantifier import Quantifier
-from utils.Quantifier_Utils import TPRandFPR
+from QuantifiersLibrary.interface_class.Quantifier import Quantifier
+from QuantifiersLibrary.utils.Quantifier_Utils import TPRandFPR
 
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import train_test_split
@@ -19,7 +19,7 @@ class X(Quantifier):
         threshold, fpr, tpr = self.tprfpr.loc[min_index]
 
         # Getting the positive scores proportion
-        pos_scores = scores[:,1]
+        pos_scores = [score[1] for score in scores]
         class_prop = len([pos_score for pos_score in pos_scores if pos_score >= threshold])
         class_prop /= len(scores)
 

@@ -1,14 +1,12 @@
-from interface_class.Quantifier import Quantifier
-from utils import Quantifier_Utils as utils
-from quantifiers.ClassifyCountCorrect import ClassifyCount
-
-import pandas as pd
-import numpy as np
+from QuantifiersLibrary.interface_class.Quantifier import Quantifier
+from QuantifiersLibrary.utils import Quantifier_Utils as utils
 
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import train_test_split
 from sklearn import datasets
-import pdb
+
+import numpy as np
+import pandas as pd
 
 class HDy(Quantifier):
 

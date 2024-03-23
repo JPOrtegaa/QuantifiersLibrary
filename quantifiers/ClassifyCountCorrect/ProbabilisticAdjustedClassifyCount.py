@@ -1,5 +1,5 @@
-from interface_class.Quantifier import Quantifier
-from utils.Quantifier_Utils import TPRandFPR
+from QuantifiersLibrary.interface_class.Quantifier import Quantifier
+from QuantifiersLibrary.utils.Quantifier_Utils import TPRandFPR
 
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import train_test_split
@@ -15,8 +15,8 @@ class ProbabilisticAdjustedClassifyCount(Quantifier):
         self.tprfpr = None
 
     def get_class_proportion(self, scores):
-        total_instances = scores.shape[0]
-        number_classes = scores.shape[1]
+        total_instances = len(scores)
+        number_classes = len(scores[0])
         result = [0] * number_classes
 
         # Counting positive and negative classes
