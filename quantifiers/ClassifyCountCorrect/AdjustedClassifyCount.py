@@ -1,6 +1,5 @@
 import setup_paths
 
-
 from interface_class.Quantifier import Quantifier
 from utils.Quantifier_Utils import TPRandFPR
 
