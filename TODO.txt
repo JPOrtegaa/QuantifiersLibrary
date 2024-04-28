@@ -1,0 +1,6 @@
+Quantificadores novos:
+- EMQ
+- FM
+- FMM
+- MS_2 (substituir MS antigo)
+- SMM

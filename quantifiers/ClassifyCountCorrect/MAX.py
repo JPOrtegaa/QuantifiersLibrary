@@ -1,5 +1,7 @@
-from QuantifiersLibrary.interface_class.Quantifier import Quantifier
-from QuantifiersLibrary.utils.Quantifier_Utils import TPRandFPR
+import setup_paths
+
+from interface_class.Quantifier import Quantifier
+from utils.Quantifier_Utils import TPRandFPR
 
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import train_test_split

@@ -1,4 +1,6 @@
-from QuantifiersLibrary.interface_class.Quantifier import Quantifier
+import setup_paths
+
+from interface_class.Quantifier import Quantifier
 
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import train_test_split

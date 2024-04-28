@@ -1,7 +1,9 @@
+import setup_paths
+
 import pdb
 
-from QuantifiersLibrary.interface_class.Quantifier import Quantifier
-from QuantifiersLibrary.utils import Quantifier_Utils as utils
+from interface_class.Quantifier import Quantifier
+from utils import Quantifier_Utils as utils
 
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import train_test_split

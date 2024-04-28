@@ -1,4 +1,6 @@
-from QuantifiersLibrary.interface_class.Quantifier import Quantifier
+import setup_paths
+
+from interface_class.Quantifier import Quantifier
 
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import train_test_split
@@ -41,6 +43,7 @@ class ClassifyCount(Quantifier):
         return self.get_class_proportion(scores)
 
 if __name__ == '__main__':
+
     data = datasets.load_breast_cancer()
 
     dts_data = pd.DataFrame(data['data'], columns=data.feature_names)
