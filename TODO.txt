@@ -1,6 +1,15 @@
 Quantificadores novos:
-- EMQ
-- FM
+- EMQ OK
+- FM OK
 - FMM
 - MS_2 (substituir MS antigo)
-- SMM
+- SMM OK
+
+perguntar sobre as divisões por 0!!
+
+perguntar se train_scores em EMQ esta correto, e por que é diferente do usado em FM?
+
+EMQ train_scores deve ser validation scores, bem como train_labels é validation labels
+
+EMQ, FMM necessitam de train_scores com scores de ambas as classes, o meu só tem da classe positiva, jeito mais simples adicionar uma coluna a mais
+com cálculo de 1 - pos_prop
