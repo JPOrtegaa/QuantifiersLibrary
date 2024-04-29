@@ -53,15 +53,21 @@ class EMQ(Quantifier):
             p_s = np.sum(p_cond_s, axis = 0) / p_cond_s.shape[0]
             if (np.sum(np.abs(p_s - p_s_old)) < self.eps):
                 break
+
         prop = p_s/np.sum(p_s)
+        
         return(np.round(prop, 2))
 
 
     def fit(self, X_train, y_train):
         # Provavel fazer validation aqui!!! (nao usar o treino real :P)
+        X_val_train, X_val_test, y_val_train, y_val_test = train_test_split(X_train, y_train, test_size=0.33)
 
-        self.train_labels = y_train
-        self.nclasses = len(np.unique(y_train))
+        self.classifier.fit(X_val_train, y_val_train)
+        scores = self.classifier.predict_proba(X_val_test)
+
+        self.train_labels = y_val_test
+        self.nclasses = len(np.unique(y_val_test))
 
         self.classifier.fit(X_train, y_train)
 

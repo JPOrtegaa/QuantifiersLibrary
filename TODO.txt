@@ -1,8 +1,8 @@
 Quantificadores novos:
 - EMQ OK
 - FM OK
-- FMM
-- MS_2 (substituir MS antigo)
+- FMM 
+- MS_2 (substituir MS antigo) OK
 - SMM OK
 
 perguntar sobre as divisões por 0!!
