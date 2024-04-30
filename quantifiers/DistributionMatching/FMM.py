@@ -1,7 +1,5 @@
 import setup_paths
 
-import pdb
-
 import numpy as np
 import cvxpy
 import pandas as pd
@@ -14,7 +12,7 @@ from sklearn import datasets
 
 class FMM(Quantifier):
 
-    def __init__(self, classifier, nbins = 64, ndescriptors = 2, distribution_function = 'CDF', data_split='holdout'):
+    def __init__(self, classifier, nbins = 64, ndescriptors = 1, distribution_function = 'CDF', data_split='holdout'):
         self.classifier = classifier
         self.data_split = data_split
 
@@ -30,8 +28,64 @@ class FMM(Quantifier):
 
         self.distribution_function = distribution_function
 
+    ############
+    #  Functions for solving optimization problems with different loss functions
+    ############
+    def solve_l1(self, train_distrib, test_distrib, n_classes, solver='ECOS'):
+        """ Solves AC, PAC, PDF and Friedman optimization problems for L1 loss function
+
+            min   |train_distrib * prevalences - test_distrib|
+            s.t.  prevalences_i >=0
+                sum prevalences_i = 1
+
+            Parameters
+            ----------
+            train_distrib : array, shape depends on the optimization problem
+                Represents the distribution of each class in the training set
+                PDF: shape (n_bins * n_classes, n_classes)
+                AC, PAC, Friedman: shape (n_classes, n_classes)
+
+            test_distrib : array, shape depends on the optimization problem
+                Represents the distribution of the testing set
+                PDF: shape shape (n_bins * n_classes, 1)
+                AC, PAC, Friedman: shape (n_classes, 1)
+
+            n_classes : int
+                Number of classes
+
+            solver : str, (default='ECOS')
+                The solver used to solve the optimization problem. The following solvers have been tested:
+                'ECOS', 'ECOS_BB', 'CVXOPT', 'GLPK', 'GLPK_MI', 'SCS' and 'OSQP', but it seems that 'CVXOPT' does not
+                work
+
+            Returns
+            -------
+            prevalences : array, shape=(n_classes, )
+            Vector containing the predicted prevalence for each class
+        """
+        prevalences = cvxpy.Variable(n_classes)
+        objective = cvxpy.Minimize(cvxpy.norm(np.squeeze(test_distrib) - train_distrib * prevalences, 1))
+
+        contraints = [cvxpy.sum(prevalences) == 1, prevalences >= 0]
+
+        prob = cvxpy.Problem(objective, contraints)
+        prob.solve(solver=solver)
+
+        return np.array(prevalences[0:n_classes].value).squeeze()
+
+    def solve_l2cvx(self, train_distrib, test_distrib, n_classes, solver='ECOS'):
+        prevalences = cvxpy.Variable(n_classes)
+        objective = cvxpy.Minimize(cvxpy.sum_squares(train_distrib * prevalences - test_distrib))
+
+        contraints = [cvxpy.sum(prevalences) == 1, prevalences >= 0]
+
+        prob = cvxpy.Problem(objective, contraints)
+        prob.solve(solver=solver)
+
+        return np.array(prevalences[0:n_classes].value).squeeze()
+    
     def get_class_proportion(self):
-        test_distrib = np.zeros(self.n_bins * self.n_descriptors, 1)
+        test_distrib = np.zeros((self.nbins * self.ndescriptors, 1))
 
         for descr in range(self.ndescriptors):
             test_distrib[descr * self.nbins:(descr + 1) * self.nbins, 0] = \
@@ -42,10 +96,10 @@ class FMM(Quantifier):
         if self.distribution_function == 'CDF':
             test_distrib = np.cumsum(test_distrib, axis=0)
 
-        prevalences = solve_l1(train_distrib=self.train_distrib, test_distrib=test_distrib,
-                               n_classes=self.nclasses)
+        prevalences = self.solve_l1(train_distrib=self.train_distrib, test_distrib=test_distrib,
+                               n_classes=len(self.nclasses))
 
-        return prevalences[0]
+        return np.round([prevalences[1], prevalences[0]], 2)
 
     def fit(self, X_train, y_train):
         X_val_train, X_val_test, y_val_train, y_val_test = train_test_split(X_train, y_train, test_size=0.33)
@@ -57,11 +111,9 @@ class FMM(Quantifier):
         data = {'scores': self.train_scores, 'class': y_val_test}
         self.train_scores = pd.DataFrame(data)
 
-        pdb.set_trace()
-
         self.nclasses = np.unique(self.train_scores['class'])
 
-        train_distrib = np.zeros(self.nbins * self.ndescriptors)
+        train_distrib = np.zeros((self.nbins * self.ndescriptors, len(self.nclasses)))
 
         for n_cls, cls in enumerate(self.nclasses):
             descr = 0
@@ -76,163 +128,6 @@ class FMM(Quantifier):
     def predict(self, X_test):
         self.test_scores = self.classifier.predict_proba(X_test)
         return self.get_class_proportion()
-
-
-
-
-############
-#  Functions for solving optimization problems with different loss functions
-############
-def solve_l1(train_distrib, test_distrib, n_classes, solver='ECOS'):
-    """ Solves AC, PAC, PDF and Friedman optimization problems for L1 loss function
-
-        min   |train_distrib * prevalences - test_distrib|
-        s.t.  prevalences_i >=0
-              sum prevalences_i = 1
-
-        Parameters
-        ----------
-        train_distrib : array, shape depends on the optimization problem
-            Represents the distribution of each class in the training set
-            PDF: shape (n_bins * n_classes, n_classes)
-            AC, PAC, Friedman: shape (n_classes, n_classes)
-
-        test_distrib : array, shape depends on the optimization problem
-            Represents the distribution of the testing set
-            PDF: shape shape (n_bins * n_classes, 1)
-            AC, PAC, Friedman: shape (n_classes, 1)
-
-        n_classes : int
-            Number of classes
-
-        solver : str, (default='ECOS')
-            The solver used to solve the optimization problem. The following solvers have been tested:
-            'ECOS', 'ECOS_BB', 'CVXOPT', 'GLPK', 'GLPK_MI', 'SCS' and 'OSQP', but it seems that 'CVXOPT' does not
-            work
-
-        Returns
-        -------
-        prevalences : array, shape=(n_classes, )
-           Vector containing the predicted prevalence for each class
-    """
-    prevalences = cvxpy.Variable(n_classes)
-    objective = cvxpy.Minimize(cvxpy.norm(np.squeeze(test_distrib) - train_distrib * prevalences, 1))
-
-    contraints = [cvxpy.sum(prevalences) == 1, prevalences >= 0]
-
-    prob = cvxpy.Problem(objective, contraints)
-    prob.solve(solver=solver)
-    return np.array(prevalences[0:n_classes].value).squeeze()
-
-
-def solve_l2cvx(train_distrib, test_distrib, n_classes, solver='ECOS'):
-    prevalences = cvxpy.Variable(n_classes)
-    objective = cvxpy.Minimize(cvxpy.sum_squares(train_distrib * prevalences - test_distrib))
-
-    contraints = [cvxpy.sum(prevalences) == 1, prevalences >= 0]
-
-    prob = cvxpy.Problem(objective, contraints)
-    prob.solve(solver=solver)
-    return np.array(prevalences[0:n_classes].value).squeeze()
-
-
-def FM_fit(train_scores, n_bins = 64):
-    """ This method performs the following operations: 1) fits the estimators for the training set and the
-        testing set (if needed), and 2) computes predictions_train_ (probabilities) if needed. Both operations are
-        performed by the `fit` method of its superclass.
-        After that, the method computes the pdfs for all the classes in the training set
-
-        Parameters
-        ----------
-        X : array-like, shape (n_examples, n_features)
-            Data
-
-        y : array-like, shape (n_examples, )
-            True classes
-
-        predictions_train : ndarray, shape (n_examples, n_classes)
-            Predictions of the examples in the training set
-
-        Raises
-        ------
-        ValueError
-            When estimator_train and predictions_train are both None
-    """
-
-    n_classes = np.unique(train_scores['class'])
-    n_descriptors = 1  # number of groups of probabilities used to represent the distribution
-    n_bins = 64
-
-    train_distrib_ = np.zeros((n_bins * n_descriptors, len(n_classes)))
-    # compute pdf
-    for n_cls, cls in enumerate(n_classes):
-        descr = 0
-        train_distrib_[descr * n_bins:(descr + 1) * n_bins, n_cls] = np.histogram(train_scores[train_scores['class'] == cls]['scores'], bins=n_bins, range=(0., 1.))[0]        
-        train_distrib_[:, n_cls] = train_distrib_[:, n_cls] / (train_scores[train_scores['class'] == cls].shape[0])
-
-    # compute cdf if necessary
-    train_distrib_ = np.cumsum(train_distrib_, axis=0)   
-
-    return train_distrib_
-
-
-def FMM_predict(predictions_test, distance='L1', train_distrib_=None, distribution_function='CDF', n_bins = 64):
-    """ Predict the class distribution of a testing bag
-
-        First, predictions_test_ are computed (if needed, when predictions_test parameter is None) by
-        `super().predict()` method.
-
-        After that, the method computes the PDF for the testing bag.
-
-        Finally, the prevalences are computed using the corresponding function according to the value of
-        distance attribute
-
-        Parameters
-        ----------
-        X : array-like, shape (n_examples, n_features)
-            Testing bag
-
-        predictions_test : ndarray, shape (n_examples, n_classes) (default=None)
-            They must be probabilities (the estimator used must have a `predict_proba` method)
-
-            If predictions_test is not None they are copied on predictions_test_ and used.
-            If predictions_test is None, predictions for the testing examples are computed using the `predict`
-            method of estimator_test (it must be an actual estimator)
-
-        Raises
-        ------
-        ValueError
-            When estimator_test and predictions_test are both None
-
-        Returns
-        -------
-        prevalences : ndarray, shape(n_classes, )
-            Contains the predicted prevalence for each class
-    """
-    
-
-   
-    
-    n_classes = 2
-    n_descriptors = 1
-    
-    n_bins = 64
-    test_distrib_ = np.zeros((n_bins * n_descriptors, 1))
-    # compute pdf
-    for descr in range(n_descriptors):
-        test_distrib_[descr * n_bins:(descr + 1) * n_bins, 0] = \
-            np.histogram(predictions_test[:, descr], bins=n_bins, range=(0., 1.))[0]
-
-    test_distrib_ = test_distrib_ / len(predictions_test)
-    
-    #  compute cdf if necessary
-    if distribution_function == 'CDF':
-        test_distrib_ = np.cumsum(test_distrib_, axis=0)
-    
-    prevalences = solve_l1(train_distrib=train_distrib_, test_distrib=test_distrib_,
-                                n_classes=n_classes)    
-    
-    return prevalences[0]
 
 if __name__ == '__main__':
 
