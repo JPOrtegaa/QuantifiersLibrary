@@ -1,7 +1,7 @@
 Quantificadores novos:
 - EMQ OK
 - FM OK
-- FMM 
+- FMM OK
 - MS_2 (substituir MS antigo) OK
 - SMM OK
 
