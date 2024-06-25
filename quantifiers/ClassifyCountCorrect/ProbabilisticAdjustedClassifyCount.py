@@ -1,4 +1,4 @@
-import setup_paths
+import QuantifiersLibrary.quantifiers.ClassifyCountCorrect.setup_paths as setup_paths
 
 from interface_class.Quantifier import Quantifier
 from utils.Quantifier_Utils import TPRandFPR

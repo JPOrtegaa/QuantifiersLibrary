@@ -1,4 +1,4 @@
-import setup_paths
+import QuantifiersLibrary.quantifiers.DistributionMatching.setup_paths as setup_paths
 import pdb
 
 import numpy as np

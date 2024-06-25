@@ -1,4 +1,4 @@
-import setup_paths
+import QuantifiersLibrary.quantifiers.DistributionMatching.setup_paths as setup_paths
 
 from interface_class.Quantifier import Quantifier
 
@@ -26,25 +26,25 @@ class EMQ(Quantifier):
         return np.array([np.count_nonzero(Y == i) for i in range(nclasses)]) / Y.shape[0]
 
     def get_class_proportion(self):
-        print(self.train_labels)
+        # print(self.train_labels)
 
         p_tr = self.class_dist(self.train_labels, self.nclasses)
-        print(p_tr)
+        # print(p_tr)
 
         p_s = np.copy(p_tr)
-        print(p_s)
+        # print(p_s)
 
         p_cond_tr = np.array(self.test_scores)
         p_cond_s = np.zeros(p_cond_tr.shape)
 
-        print(p_cond_tr)
-        print(p_cond_s)
+        # print(p_cond_tr)
+        # print(p_cond_s)
 
 
         # Perguntar sobre as divisões por 0!!
         for it in range(self.max_it):
             r = p_s / p_tr
-            print(r)
+            # print(r)
             p_cond_s = p_cond_tr * r
             s = np.sum(p_cond_s, axis = 1)
             for c in range(self.nclasses):

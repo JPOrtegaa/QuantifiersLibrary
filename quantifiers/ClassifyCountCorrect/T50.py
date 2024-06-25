@@ -1,4 +1,4 @@
-import setup_paths
+import QuantifiersLibrary.quantifiers.ClassifyCountCorrect.setup_paths as setup_paths
 
 from interface_class.Quantifier import Quantifier
 from utils.Quantifier_Utils import TPRandFPR
@@ -26,7 +26,10 @@ class T50(Quantifier):
         class_prop = len([pos_score for pos_score in pos_scores if pos_score >= threshold])
         class_prop /= len(scores)
 
-        pos_prop = round(abs(class_prop - fpr) / abs(tpr - fpr), 2)  # adjusted class proportion
+        if abs(tpr - fpr) != 0:
+            pos_prop = round(abs(class_prop - fpr) / abs(tpr - fpr), 2)  # adjusted class proportion
+        else:
+            pos_prop = class_prop
 
         if pos_prop <= 0:  # clipping the output between [0,1]
             pos_prop = 0

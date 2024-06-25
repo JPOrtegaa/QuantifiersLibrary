@@ -1,4 +1,4 @@
-import setup_paths
+import QuantifiersLibrary.quantifiers.DistributionMatching.setup_paths as setup_paths
 
 from interface_class.Quantifier import Quantifier
 from utils import Quantifier_Utils as utils

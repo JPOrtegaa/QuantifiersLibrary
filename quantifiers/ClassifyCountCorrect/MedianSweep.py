@@ -1,4 +1,4 @@
-import setup_paths
+import QuantifiersLibrary.quantifiers.ClassifyCountCorrect.setup_paths as setup_paths
 
 import pdb
 
